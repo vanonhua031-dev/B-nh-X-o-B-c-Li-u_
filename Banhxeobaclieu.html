@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bánh Xèo Bạc Liêu v0.1</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #fff;
+            text-align: center;
+            margin: 0;
+            padding: 10px;
+            user-select: none;
+        }
+        .game-container {
+            max-width: 420px;
+            margin: 0 auto;
+            background: #111;
+            padding: 15px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            border: 3px solid #ffcb74;
+            position: relative;
+            overflow: hidden;
+        }
+        h1 { font-size: 20px; margin: 5px 0; color: #ffcb74; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .subtitle { font-size: 11px; color: #bbb; margin-bottom: 8px; }
+        
+        .stats { 
+            display: flex; 
+            justify-content: space-around; 
+            background: #222; 
+            padding: 8px; 
+            border-radius: 12px; 
+            font-weight: bold; 
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #ffcb74;
+            border: 1px solid #444;
+        }
+
+        /* KHU VỰC KHÁCH HÀNG */
+        .customer-area {
+            background: #1e272e;
+            border-radius: 12px;
+            padding: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            border: 1px solid #3d5467;
+        }
+        .customer-avatar {
+            font-size: 45px;
+            background: #2d3436;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #ffcb74;
+            animation: bounce 2s infinite ease-in-out;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        .customer-speech {
+            background: #00b894;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            max-width: 220px;
+            position: relative;
+        }
+
+        #panCanvas {
+            background: #181818;
+            border-radius: 15px;
+            border: 2px solid #333;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+            margin-bottom: 10px;
+        }
+
+        button.action-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5253);
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: 0.2s;
+        }
+        button.action-btn:active { transform: scale(0.97); }
+        
+        .log { margin-top: 8px; font-size: 12px; color: #ffcb74; min-height: 22px; font-weight: bold; }
+
+        /* SHOP NÂNG CẤP */
+        .shop-title { font-size: 13px; margin: 12px 0 6px; color: #4ecdc4; text-align: left; font-weight: bold; }
+        .shop-container { display: flex; gap: 8px; }
+        .shop-item { flex: 1; background: #222; border: 1px solid #444; padding: 8px; border-radius: 10px; font-size: 11px; }
+        .shop-item button { background: #ffcb74; color: #000; border: none; padding: 5px; border-radius: 6px; font-weight: bold; font-size: 11px; width: 100%; margin-top: 5px; cursor: pointer; }
+        .shop-item button:disabled { background: #555; color: #888; cursor: not-allowed; }
+
+        .sound-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.1); border: 1px solid #ffcb74; color: #ffcb74; border-radius: 50%; width: 30px; height: 30px; font-size: 14px; cursor: pointer; }
+
+        .coin-popup {
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 26px;
+            font-weight: bold;
+            color: #f1c40f;
+            text-shadow: 0 0 10px #000;
+            pointer-events: none;
+            animation: floatUp 1s ease-out forwards;
+        }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translate(-50%, -20px) scale(0.8); }
+            100% { opacity: 0; transform: translate(-50%, -80px) scale(1.3); }
+        }
+
+        /* BẢNG THÔNG BÁO WELCOME POP-UP */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; 
+            width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999999;
+        }
+        .popup-card {
+            background: #2d3436;
+            border: 2px solid #ffcb74;
+            border-radius: 16px;
+            padding: 20px;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        .popup-card h2 {
+            color: #ffcb74;
+            font-size: 18px;
+            margin-top: 0;
+        }
+        .popup-card p {
+            font-size: 13px;
+            color: #dcdde1;
+            line-height: 1.5;
+            margin: 10px 0;
+        }
+        .popup-btn {
+            background: #2ecc71;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .popup-btn:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+
+    <!-- BẢNG THÔNG BÁO MỚI VÀO GAME -->
+    <div class="overlay" id="welcomePopup">
+        <div class="popup-card">
+            <h2>⚠️ THÔNG BÁO v0.1</h2>
+            <p>🤖 Game này được hỗ trợ tạo bởi <b>AI</b>.</p>
+            <p>🛠️️ Đây là bản thử nghiệm nên <b>chưa được hoàn thiện</b> và <b>chưa được hay ho lắm</b>, mong mọi người thông cảm nghen!</p>
+            <button class="popup-btn" onclick="closePopup()">Trải Nghiệm Thử 🚀</button>
+        </div>
+    </div>
+
+    <div class="game-container" id="container">
+        <button class="sound-btn" onclick="toggleSound()" id="soundToggle">🔊</button>
+        
+        <h1>🫓 Bánh Xèo Bạc Liêu v0.1</h1>
+        <div class="subtitle">Phiên Bản Thử Nghiệm Alpha • Đồ Họa & Âm Thanh VIP</div>
+
+        <div class="stats">
+            <div>🪙 Xu: <span id="coins">0</span>k</div>
+            <div>⭐ Khách: <span id="score">0</span></div>
+        </div>
+
+        <!-- KHU VỰC KHÁCH HÀNG -->
+        <div class="customer-area">
+            <div class="customer-avatar" id="customerAvatar">👨‍🌾</div>
+            <div style="text-align: left;">
+                <div id="customerName" style="font-size: 11px; color: #aaa; margin-bottom: 2px;">Chú 7 Bạc Liêu:</div>
+                <div class="customer-speech" id="customerSpeech">Cho 1 bánh xèo Bạc Liêu đặc sản nghen cháu!</div>
+            </div>
+        </div>
+
+        <canvas id="panCanvas" width="360" height="210"></canvas>
+
+        <button class="action-btn" id="action-btn" onclick="handleGameAction()">1. Đổ Bột Bánh Xèo! 🥣</button>
+        <div class="log" id="game-log">Bấm nút để trút bột vào chảo!</div>
+
+        <!-- MUA SẮM NÂNG CẤP -->
+        <div class="shop-title">🛒 Cửa Hàng Nâng Cấp Quán:</div>
+        <div class="shop-container">
+            <div class="shop-item">
+                <div>🍳 Chảo Gang Nhanh</div>
+                <div style="color: #aaa; margin: 3px 0;">Tráng bánh nhanh hơn 1.5s</div>
+                <button id="buy-pan" onclick="buyUpgrade('pan')" disabled>Mua (100k)</button>
+            </div>
+            <div class="shop-item">
+                <div>🔥 Bếp Ga Đôi Lửa Xanh</div>
+                <div style="color: #aaa; margin: 3px 0;">Thu nhập x1.5 xu</div>
+                <button id="buy-stove" onclick="buyUpgrade('stove')" disabled>Mua (200k)</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function closePopup() {
+            document.getElementById("welcomePopup").style.display = "none";
+        }
+
+        const canvas = document.getElementById("panCanvas");
+        const ctx = canvas.getContext("2d");
+
+        let coins = 0;
+        let score = 0;
+        let gameStep = 1; 
+        
+        let cakeSize = 0; 
+        let tiltAngle = 0;      
+        let isShaking = false;
+        let animationFrame;
+        let particles = [];
+        let soundEnabled = true;
+
+        let cookTime = 3000; 
+        let coinMultiplier = 1; 
+        let hasPanUpgrade = false;
+        let hasStoveUpgrade = false;
+
+        const customers = [
+            { name: "Chú 7 Bạc Liêu", icon: "👨‍🌾", order: "Bánh xèo Đặc Sản Bạc Liêu 🫓", happy: "Bánh giòn rụm ngon quá cháu ơi! ❤️" },
+            { name: "Cô Ba Bạc Liêu", icon: "👩‍🍳", order: "Bánh xèo Tôm Đất Béo Ngậy 🦐", happy: "Tôm béo ngậy chuẩn vị quê hương! 👍" },
+            { name: "Cậu Bé Háu Ăn", icon: "👦", order: "Bánh xèo Nhân Thịt Vịt 🦆", happy: "Ngon tuyệt cú mèo luôn chú ơi! 😋" },
+            { name: "Anh Tây Du Lịch", icon: "👱‍♂️", order: "Bánh xèo Chay Rau Rừng 🌿", happy: "Delicious! Amazing Banh Xeo! 🎉" }
+        ];
+
+        let currentCustomer = customers[0];
+
+        let isImgLoaded = false;
+        const banhXeoImg = new Image();
+        banhXeoImg.src = "https://i.postimg.cc/T1k0DkxM/1000016810-removebg-preview.png";
+
+        banhXeoImg.onload = function() {
+            isImgLoaded = true;
+            drawScene(0, 0, "EMPTY");
+        };
+
+        // Web Audio API
+        let audioCtx = null;
+        let sizzleNode = null;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById("soundToggle").innerText = soundEnabled ? "🔊" : "🔇";
+            if (!soundEnabled && sizzleNode) stopSizzleSound();
+        }
+
+        function playSizzleSound() {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                let bufferSize = audioCtx.sampleRate * 2;
+                let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                let output = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
+
+                sizzleNode = audioCtx.createBufferSource();
+                sizzleNode.buffer = buffer; sizzleNode.loop = true;
+
+                let filter = audioCtx.createBiquadFilter();
+                filter.type = 'bandpass'; filter.frequency.value = 3200;
+
+                let gain = audioCtx.createGain(); gain.gain.value = 0.15;
+
+                sizzleNode.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
+                sizzleNode.start();
+            } catch (e) {}
+        }
+
+        function stopSizzleSound() {
+            if (sizzleNode) { sizzleNode.stop(); sizzleNode = null; }
+        }
+
+        function playCoinSound() {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(987.77, audioCtx.currentTime); 
+                osc.frequency.exponentialRampToValueAtTime(1318.51, audioCtx.currentTime + 0.15); 
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.15);
+            } catch (e) {}
+        }
+
+        drawScene(0, 0, "EMPTY");
+
+        function drawScene(size, angle, state) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. KIỀNG BẾP GA
+            ctx.save();
+            ctx.translate(180, 105);
+            ctx.strokeStyle = "#444";
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(-80, 0); ctx.lineTo(-50, 0);
+            ctx.moveTo(80, 0); ctx.lineTo(50, 0);
+            ctx.moveTo(0, -80); ctx.lineTo(0, -50);
+            ctx.moveTo(0, 80); ctx.lineTo(0, 50);
+            ctx.stroke();
+
+            // Lửa bếp ga
+            if (state === "POUR" || state === "SHAKING" || state === "READY") {
+                for (let i = 0; i < 8; i++) {
+                    let fireAngle = (i * Math.PI) / 4;
+                    let fx = Math.cos(fireAngle) * 42;
+                    let fy = Math.sin(fireAngle) * 42;
+                    ctx.beginPath(); ctx.arc(fx, fy, 7, 0, Math.PI * 2);
+                    ctx.fillStyle = hasStoveUpgrade ? "#00d2d3" : ((i % 2 === 0) ? "#ff4757" : "#ffa502");
+                    ctx.fill();
+                }
+            }
+            ctx.restore();
+
+            // 2. CHẢO
+            ctx.save();
+            ctx.translate(180, 105);
+            ctx.rotate((angle * Math.PI) / 180);
+
+            // Cán chảo
+            ctx.beginPath(); ctx.rect(60, -9, 75, 18);
+            ctx.fillStyle = "#222"; ctx.fill();
+            ctx.lineWidth = 2; ctx.strokeStyle = "#777"; ctx.stroke();
+
+            // Tay cầm
+            ctx.fillStyle = hasPanUpgrade ? "#ff6b6b" : "#f1c40f";
+            ctx.beginPath(); ctx.roundRect(115, -14, 28, 28, 7); ctx.fill();
+
+            // Lòng chảo
+            ctx.beginPath(); ctx.arc(0, 0, 68, 0, Math.PI * 2);
+            ctx.fillStyle = hasPanUpgrade ? "#2d3436" : "#333"; ctx.fill();
+            ctx.lineWidth = 5; ctx.strokeStyle = hasPanUpgrade ? "#00cec9" : "#666"; ctx.stroke();
+
+            ctx.beginPath(); ctx.arc(0, 0, 60, 0, Math.PI * 2);
+            ctx.fillStyle = "#1e272e"; ctx.fill();
+
+            // 3. HIỆN BÁNH XÈO AI
+            if (size > 0 && isImgLoaded) {
+                ctx.drawImage(banhXeoImg, -size / 2, -size / 2, size, size);
+            }
+            ctx.restore();
+
+            // 4. KHÓI BAY
+            if (state === "SHAKING" || state === "READY") {
+                if (Math.random() < 0.4) {
+                    particles.push({
+                        x: 180 + (Math.random() * 50 - 25),
+                        y: 105 + (Math.random() * 50 - 25),
+                        r: 4 + Math.random() * 6,
+                        alpha: 0.6
+                    });
+                }
+            }
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(220, 220, 220, ${p.alpha})`; ctx.fill();
+                p.y -= 1.2; p.r += 0.2; p.alpha -= 0.015;
+                if (p.alpha <= 0) particles.splice(i, 1);
+            }
+        }
+
+        function animateTilt() {
+            if (!isShaking) return;
+            tiltAngle = Math.sin(Date.now() / 120) * 18; 
+            if (cakeSize < 115) cakeSize += 0.4; 
+            drawScene(cakeSize, tiltAngle, "SHAKING");
+            animationFrame = requestAnimationFrame(animateTilt);
+        }
+
+        function showCoinEffect(earned) {
+            let popup = document.createElement("div");
+            popup.className = "coin-popup";
+            popup.innerText = `+${earned}k 🪙`;
+            document.getElementById("container").appendChild(popup);
+            setTimeout(() => popup.remove(), 1000);
+        }
+
+        function handleGameAction() {
+            let btn = document.getElementById("action-btn");
+            let log = document.getElementById("game-log");
+
+            if (gameStep === 1) {
+                cakeSize = 70; 
+                drawScene(cakeSize, 0, "POUR");
+                gameStep = 2;
+                btn.innerText = "2. Cầm Quai Lắc Chảo Xoay Tròn! 🔄";
+                btn.style.background = "linear-gradient(45deg, #00d2d3, #01a3a4)";
+                log.innerText = "🥣 Bột trút vào chảo! Bấm Lắc Chảo để tráng mỏng bánh!";
+
+            } else if (gameStep === 2) {
+                if (!isShaking) {
+                    isShaking = true;
+                    playSizzleSound();
+                    animateTilt();
+                    btn.innerText = "🔊 Đang lắc chảo xèo xèo...";
+                    log.innerText = "🔥 XÈO XÈO! Bột tráng đều & chiên chín giòn!";
+
+                    setTimeout(() => {
+                        isShaking = false;
+                        stopSizzleSound();
+                        cancelAnimationFrame(animationFrame);
+                        
+                        cakeSize = 115;
+                        drawScene(cakeSize, 0, "READY");
+
+                        gameStep = 3;
+                        btn.innerText = "3. Bưng Ra Cho Khách Thưởng Thức! 🍽";
+                        btn.style.background = "linear-gradient(45deg, #10ac84, #1dd1a1)";
+                        log.innerText = "🎉 Bánh xèo AI chín giòn rồi! Bưng cho khách thôi!";
+                    }, cookTime);
+                }
+
+            } else if (gameStep === 3) {
+                let earnedCoins = Math.round(45 * coinMultiplier);
+                coins += earnedCoins;
+                score += 1;
+                document.getElementById("coins").innerText = coins;
+                document.getElementById("score").innerText = score;
+
+                playCoinSound();
+                showCoinEffect(earnedCoins);
+                
+                document.getElementById("customerSpeech").innerText = currentCustomer.happy;
+                log.innerText = `✨ Khách ăn khen ngon nức nở! +${earnedCoins}k xu!`;
+
+                setTimeout(() => {
+                    let nextIndex = Math.floor(Math.random() * customers.length);
+                    currentCustomer = customers[nextIndex];
+                    
+                    document.getElementById("customerAvatar").innerText = currentCustomer.icon;
+                    document.getElementById("customerName").innerText = `${currentCustomer.name}:`;
+                    document.getElementById("customerSpeech").innerText = `Cho 1 ${currentCustomer.order} nhé!`;
+
+                    cakeSize = 0; 
+                    particles = [];
+                    drawScene(0, 0, "EMPTY");
+                    gameStep = 1;
+                    btn.innerText = "1. Đổ Bột Bánh Tiếp Theo! 🥣";
+                    btn.style.background = "linear-gradient(45deg, #ff6b6b, #ee5253)";
+
+                    checkShopStatus();
+                }, 1200);
+            }
+        }
+
+        function checkShopStatus() {
+            let panBtn = document.getElementById("buy-pan");
+            let stoveBtn = document.getElementById("buy-stove");
+
+            if (!hasPanUpgrade && coins >= 100) panBtn.disabled = false;
+            if (!hasStoveUpgrade && coins >= 200) stoveBtn.disabled = false;
+        }
+
+        function buyUpgrade(type) {
+            if (type === 'pan' && coins >= 100 && !hasPanUpgrade) {
+                coins -= 100;
+                hasPanUpgrade = true;
+                cookTime = 1500; 
+                document.getElementById("coins").innerText = coins;
+                document.getElementById("buy-pan").innerText = "Đã Nâng Cấp ✔️";
+                document.getElementById("buy-pan").disabled = true;
+                drawScene(cakeSize, 0, cakeSize > 0 ? "POUR" : "EMPTY");
+            } else if (type === 'stove' && coins >= 200 && !hasStoveUpgrade) {
+                coins -= 200;
+                hasStoveUpgrade = true;
+                coinMultiplier = 1.5; 
+                document.getElementById("coins").innerText = coins;
+                document.getElementById("buy-stove").innerText = "Đã Nâng Cấp ✔️";
+                document.getElementById("buy-stove").disabled = true;
+                drawScene(cakeSize, 0, cakeSize > 0 ? "POUR" : "EMPTY");
+            }
+        }
+    </script>
+</body>
+</html>
